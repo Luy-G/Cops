@@ -11,23 +11,23 @@ public class ItsmTicket
     public long ItsmTicketId { get; set; }
 
     public long ClientId { get; set; }
-    public string SourceSystem { get; set; } = "unknown";
+    public SourceSystem SourceSystem { get; set; } = SourceSystem.Other;
 
-    public string TicketKey { get; set; } = null!;
-    public string IssueId { get; set; } = null!;
+    public string TicketKey { get; set; }
+    public long IssueId { get; set; }
 
-    public ItsmStatus Status { get; set; } = ItsmStatus.Unknown;
-    public ItsmIssueType IssueType { get; set; } = ItsmIssueType.Unknown;
-    public PriorityLevel Priority { get; set; } = PriorityLevel.Unknown;
-    public ItsmResolution Resolution { get; set; } = ItsmResolution.None;
+    public ItsmStatus Status { get; set; }
+    public ItsmIssueType IssueType { get; set; } 
+    public PriorityLevel Priority { get; set; } 
+    public ItsmResolution Resolution { get; set; }
 
-    public string? Title { get; set; }
-    public string? DescriptionText { get; set; }
+    public string Title { get; set; }
+    public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
 
     public DateTime CreatedAt { get; set; }
-    public DateTime? ResolvedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public DateTime? ResolvedAt { get; set; }
 
     public string? CreatorName { get; set; }
     public string? CreatorEmail { get; set; }

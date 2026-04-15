@@ -62,3 +62,10 @@ public enum DomainKey
         IdentityAndAccessSecurity = 6,
         GovernanceAndResilience = 7
 }
+
+
+public enum SourceSystem
+{
+    Other = 0,
+    Jira = 1
+}

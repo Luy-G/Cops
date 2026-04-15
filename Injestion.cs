@@ -1,17 +1,25 @@
+using FluentValidation;
+
 public class ItsmIngestion
 {
-    public ItsmTicket BuildTicket(JsonSogilubDto dto, long clientId)
+    private readonly SogilubJsonDtoValidator _validator = new();
+
+    public ItsmTicket BuildTicket(SogilubJsonDto dto, long clientId)
     {
-        if (!ItsmDtoValidator.IsValid(dto))
-            throw new ArgumentException("Invalid ITSM DTO.");
+        var validationResult = _validator.Validate(dto);
+
+        if (!validationResult.IsValid)
+            throw new ArgumentException();
+
+        var issueId = long.Parse(dto.IssueId);
 
         return new ItsmTicket
         {
             ClientId = clientId,
-            SourceSystem = "jira",
+            SourceSystem = SourceSystem.Jira,
 
-            TicketKey = dto.TicketKey ?? string.Empty,
-            IssueId = dto.IssueId ?? string.Empty,
+            TicketKey = dto.TicketKey,
+            IssueId = issueId,
 
             Status = ItsmEnumMapper.MapStatus(dto.Status),
             IssueType = ItsmEnumMapper.MapIssueType(dto.IssueType),
@@ -19,10 +27,10 @@ public class ItsmIngestion
             Resolution = ItsmEnumMapper.MapResolution(dto.Resolution),
 
             Title = dto.Summary,
-            DescriptionText = dto.Description,
+            Description = dto.Description,
             DescriptionHtml = dto.DescriptionHtml,
 
-            CreatedAt = dto.CreatedAt!.Value,
+            CreatedAt = dto.CreatedAt,
             ResolvedAt = dto.ResolvedAt,
             UpdatedAt = dto.UpdatedAt,
 

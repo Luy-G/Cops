@@ -1,6 +1,6 @@
 using System;
 
-var dto = new JsonSogilubDto
+var dto = new SogilubJsonDto
 {
     TicketKey = "",
     IssueId = "",

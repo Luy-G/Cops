@@ -1,150 +1,89 @@
+using System.Linq;
+
 public static class ItsmEnumMapper
 {
-    public static ItsmStatus MapStatus(string? rawStatus)
+
+    public static ItsmStatus MapStatus(string rawStatus)
     {
-        rawStatus = rawStatus?.Trim();
+        ItsmStatus result = rawStatus switch
+        {
+            var x when IsOneOf(x, "New") => ItsmStatus.New,
+            var x when IsOneOf(x, "Open") => ItsmStatus.Open,
+            var x when IsOneOf(x, "Triaged") => ItsmStatus.Triaged,
+            var x when IsOneOf(x, "In Progress", "InProgress") => ItsmStatus.InProgress,
+            var x when IsOneOf(x, "Pending") => ItsmStatus.Pending,
+            var x when IsOneOf(x, "On Hold", "OnHold") => ItsmStatus.OnHold,
+            var x when IsOneOf(x, "Resolved") => ItsmStatus.Resolved,
+            var x when IsOneOf(x, "Closed") => ItsmStatus.Closed,
+            var x when IsOneOf(x, "Cancelled", "Canceled") => ItsmStatus.Cancelled,
+            var x when IsOneOf(x, "Reopened") => ItsmStatus.Reopened,
+            _ => ItsmStatus.Unknown
+        };
 
-        if (string.IsNullOrWhiteSpace(rawStatus))
-            return ItsmStatus.Unknown;
-
-        if (rawStatus.Equals("New", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.New;
-
-        if (rawStatus.Equals("Open", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Open;
-
-        if (rawStatus.Equals("Triaged", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Triaged;
-
-        if (rawStatus.Equals("In Progress", StringComparison.OrdinalIgnoreCase) ||
-            rawStatus.Equals("InProgress", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.InProgress;
-
-        if (rawStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Pending;
-
-        if (rawStatus.Equals("On Hold", StringComparison.OrdinalIgnoreCase) ||
-            rawStatus.Equals("OnHold", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.OnHold;
-
-        if (rawStatus.Equals("Resolved", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Resolved;
-
-        if (rawStatus.Equals("Closed", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Closed;
-
-        if (rawStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) ||
-            rawStatus.Equals("Canceled", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Cancelled;
-
-        if (rawStatus.Equals("Reopened", StringComparison.OrdinalIgnoreCase))
-            return ItsmStatus.Reopened;
-
-        return ItsmStatus.Unknown;
+        return result;
     }
 
-    public static ItsmIssueType MapIssueType(string? rawIssueType)
+    public static ItsmIssueType MapIssueType(string rawIssueType)
     {
-        rawIssueType = rawIssueType?.Trim();
+        ItsmIssueType result = rawIssueType switch
+        {
+            var x when IsOneOf(x, "Incident") => ItsmIssueType.Incident,
+            var x when IsOneOf(x, "Task") => ItsmIssueType.Task,
+            var x when IsOneOf(x, "Sub-task", "Subtask") => ItsmIssueType.Subtask,
+            var x when IsOneOf(x, "Service Request", "ServiceRequest") => ItsmIssueType.ServiceRequest,
+            var x when IsOneOf(x, "Problem") => ItsmIssueType.Problem,
+            var x when IsOneOf(x, "Change") => ItsmIssueType.Change,
+            var x when IsOneOf(x, "Case") => ItsmIssueType.Case,
+            var x when IsOneOf(x, "Other") => ItsmIssueType.Other,
+            _ => ItsmIssueType.Unknown
+        };
 
-        if (string.IsNullOrWhiteSpace(rawIssueType))
-            return ItsmIssueType.Unknown;
-
-        if (rawIssueType.Equals("Incident", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Incident;
-
-        if (rawIssueType.Equals("Task", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Task;
-
-        if (rawIssueType.Equals("Sub-task", StringComparison.OrdinalIgnoreCase) ||
-            rawIssueType.Equals("Subtask", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Subtask;
-
-        if (rawIssueType.Equals("Service Request", StringComparison.OrdinalIgnoreCase) ||
-            rawIssueType.Equals("ServiceRequest", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.ServiceRequest;
-
-        if (rawIssueType.Equals("Problem", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Problem;
-
-        if (rawIssueType.Equals("Change", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Change;
-
-        if (rawIssueType.Equals("Case", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Case;
-
-        if (rawIssueType.Equals("Other", StringComparison.OrdinalIgnoreCase))
-            return ItsmIssueType.Other;
-
-        return ItsmIssueType.Unknown;
+        return result;
     }
 
-    public static PriorityLevel MapPriority(string? rawPriority)
+    public static PriorityLevel MapPriority(string rawPriority)
     {
-        rawPriority = rawPriority?.Trim();
+        PriorityLevel result = rawPriority switch
+        {
+            var x when IsOneOf(x, "P1", "P1 (Critical)", "Critical") => PriorityLevel.Critical,
+            var x when IsOneOf(x, "P2", "P2 (Urgent)", "High") => PriorityLevel.High,
+            var x when IsOneOf(x, "P3", "P3 (Normal)", "Medium") => PriorityLevel.Medium,
+            var x when IsOneOf(x, "P4", "P4 (Low)", "Low") => PriorityLevel.Low,
+            _ => PriorityLevel.Unknown
+        };
 
-        if (string.IsNullOrWhiteSpace(rawPriority))
-            return PriorityLevel.Unknown;
-
-        if (rawPriority.Equals("P1", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("P1 (Critical)", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("Critical", StringComparison.OrdinalIgnoreCase))
-            return PriorityLevel.Critical;
-
-        if (rawPriority.Equals("P2", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("P2 (Urgent)", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("High", StringComparison.OrdinalIgnoreCase))
-            return PriorityLevel.High;
-
-        if (rawPriority.Equals("P3", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("P3 (Normal)", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("Medium", StringComparison.OrdinalIgnoreCase))
-            return PriorityLevel.Medium;
-
-        if (rawPriority.Equals("P4", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("P4 (Low)", StringComparison.OrdinalIgnoreCase) ||
-            rawPriority.Equals("Low", StringComparison.OrdinalIgnoreCase))
-            return PriorityLevel.Low;
-
-        return PriorityLevel.Unknown;
+        return result;
     }
 
-    public static ItsmResolution MapResolution(string? rawResolution)
+    public static ItsmResolution MapResolution(string rawResolution)
     {
-        rawResolution = rawResolution?.Trim();
+        ItsmResolution result = rawResolution switch
+        {
+            var x when string.IsNullOrWhiteSpace(x) => ItsmResolution.None,
+            var x when IsOneOf(x, "Done") => ItsmResolution.Done,
+            var x when IsOneOf(x, "Resolved") => ItsmResolution.Resolved,
+            var x when IsOneOf(x, "Fixed") => ItsmResolution.Fixed,
+            var x when IsOneOf(x, "Workaround") => ItsmResolution.Workaround,
+            var x when IsOneOf(x, "Duplicate") => ItsmResolution.Duplicate,
+            var x when IsOneOf(x, "Won't Fix", "Wont Fix") => ItsmResolution.WontFix,
+            var x when IsOneOf(x, "Not Reproducible") => ItsmResolution.NotReproducible,
+            var x when IsOneOf(x, "Cancelled", "Canceled") => ItsmResolution.Cancelled,
+            var x when IsOneOf(x, "Rejected") => ItsmResolution.Rejected,
+            _ => ItsmResolution.Unknown
+        };
 
-        if (string.IsNullOrWhiteSpace(rawResolution))
-            return ItsmResolution.None;
+        return result;
+    }
 
-        if (rawResolution.Equals("Done", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Done;
 
-        if (rawResolution.Equals("Resolved", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Resolved;
 
-        if (rawResolution.Equals("Fixed", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Fixed;
+        private static bool IsOneOf(string value, params string[] options)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
 
-        if (rawResolution.Equals("Workaround", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Workaround;
+        var normalized = value.Trim();
 
-        if (rawResolution.Equals("Duplicate", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Duplicate;
-
-        if (rawResolution.Equals("Won't Fix", StringComparison.OrdinalIgnoreCase) ||
-            rawResolution.Equals("Wont Fix", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.WontFix;
-
-        if (rawResolution.Equals("Not Reproducible", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.NotReproducible;
-
-        if (rawResolution.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) ||
-            rawResolution.Equals("Canceled", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Cancelled;
-
-        if (rawResolution.Equals("Rejected", StringComparison.OrdinalIgnoreCase))
-            return ItsmResolution.Rejected;
-
-        return ItsmResolution.Unknown;
+        return options.Any(option => normalized.Equals(option, StringComparison.OrdinalIgnoreCase));
     }
 }

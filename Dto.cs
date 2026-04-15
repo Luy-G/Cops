@@ -1,18 +1,19 @@
-public class JsonSogilubDto
+public class SogilubJsonDto
 {
-    public string? TicketKey { get; set; }
-    public string? IssueId { get; set; }
+    public required string TicketKey { get; set; }
+    public required string IssueId { get; set; }
 
-    public string? Status { get; set; }
-    public string? IssueType { get; set; }
-    public string? Priority { get; set; }
-    public string? Resolution { get; set; }
+    public required string Status { get; set; }
+    public required string IssueType { get; set; }
+    public required string Priority { get; set; }
+    public required string Resolution { get; set; }
 
-    public string? Summary { get; set; }
+    public required string Summary { get; set; }
+
     public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime? ResolvedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
