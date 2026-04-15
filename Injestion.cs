@@ -11,7 +11,12 @@ public class ItsmIngestion
         if (!validationResult.IsValid)
             throw new ArgumentException();
 
-        var issueId = long.Parse(dto.IssueId);
+        var issueId = Convert.ToInt64(dto.IssueId);
+
+        bool? firstResponseSlaBreached = null;
+
+        if (!string.IsNullOrWhiteSpace(dto.FirstResponseSlaBreached))
+            firstResponseSlaBreached = bool.Parse(dto.FirstResponseSlaBreached);
 
         return new ItsmTicket
         {
@@ -30,9 +35,9 @@ public class ItsmIngestion
             Description = dto.Description,
             DescriptionHtml = dto.DescriptionHtml,
 
-            CreatedAt = dto.CreatedAt,
-            ResolvedAt = dto.ResolvedAt,
-            UpdatedAt = dto.UpdatedAt,
+            CreatedAt = dto.CreatedAt.UtcDateTime,
+            ResolvedAt = dto.ResolvedAt?.UtcDateTime,
+            UpdatedAt = dto.UpdatedAt?.UtcDateTime,
 
             CreatorName = dto.CreatorName,
             CreatorEmail = dto.CreatorEmail,
@@ -45,9 +50,9 @@ public class ItsmIngestion
 
             FirstResponseDurationText = dto.FirstResponseDurationText,
             FirstResponseDurationMs = dto.FirstResponseDurationMs,
-            FirstResponseSlaStartAt = dto.FirstResponseSlaStartAt,
-            FirstResponseSlaCompleteAt = dto.FirstResponseSlaCompleteAt,
-            FirstResponseSlaBreached = dto.FirstResponseSlaBreached,
+            FirstResponseSlaStartAt = dto.FirstResponseSlaStartAt?.UtcDateTime,
+            FirstResponseSlaCompleteAt = dto.FirstResponseSlaCompleteAt?.UtcDateTime,
+            FirstResponseSlaBreached = firstResponseSlaBreached,
 
             TimeSpentHours = dto.TimeSpentHours
         };

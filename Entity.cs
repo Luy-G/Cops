@@ -48,3 +48,16 @@ public class ItsmTicket
 
     public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
 }
+
+
+public class ClientItsmThreshold
+{
+    public long ClientItsmThresholdId { get; set; }
+
+    public long ClientId { get; set; }
+
+    public int OpenTickets100Max { get; set; }
+    public int OpenTickets70Max { get; set; }
+
+    public decimal MttrTargetHours { get; set; }
+}

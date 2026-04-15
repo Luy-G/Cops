@@ -17,7 +17,7 @@ public class SogilubJsonDtoValidator : AbstractValidator<SogilubJsonDto>
         RuleFor(x => x.CreatedAt).NotEmpty();
 
         RuleFor(x => x.IssueId)
-            .Must(x => long.TryParse(x, out _));
+            .GreaterThan(0);
 
         RuleFor(x => x.TimeSpentHours)
             .GreaterThanOrEqualTo(0)

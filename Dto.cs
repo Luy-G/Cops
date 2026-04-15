@@ -1,7 +1,7 @@
 public class SogilubJsonDto
 {
     public required string TicketKey { get; set; }
-    public required string IssueId { get; set; }
+    public required double IssueId { get; set; }
 
     public required string Status { get; set; }
     public required string IssueType { get; set; }
@@ -13,9 +13,9 @@ public class SogilubJsonDto
     public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
 
-    public DateTime CreatedAt { get; set; }
-    public DateTime? ResolvedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? ResolvedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     public string? CreatorName { get; set; }
     public string? CreatorEmail { get; set; }
@@ -28,9 +28,9 @@ public class SogilubJsonDto
 
     public string? FirstResponseDurationText { get; set; }
     public long? FirstResponseDurationMs { get; set; }
-    public DateTime? FirstResponseSlaStartAt { get; set; }
-    public DateTime? FirstResponseSlaCompleteAt { get; set; }
-    public bool? FirstResponseSlaBreached { get; set; }
+    public DateTimeOffset? FirstResponseSlaStartAt { get; set; }
+    public DateTimeOffset? FirstResponseSlaCompleteAt { get; set; }
+    public string? FirstResponseSlaBreached { get; set; }
 
     public decimal? TimeSpentHours { get; set; }
 }

@@ -15,17 +15,19 @@ public static class ItsmCalculations
         return closedTickets.Average(t => t.TimeSpentHours!.Value);
     }
 
-    public static decimal CalculateMttrScore(List<ItsmTicket> tickets)
+    public static decimal CalculateMttrScore(
+        List<ItsmTicket> tickets,
+        ClientItsmThreshold threshold)
     {
         var mttr = CalculateMttr(tickets);
+        var target = threshold.MttrTargetHours;
 
-        if (mttr <= 4)
-            return 1m;
+        if (target <= 0)
+            return 0m;
 
-        if (mttr <= 8)
-            return 0.7m;
+        var divisor = mttr > target ? mttr : target;
 
-        return 0.3m;
+        return target / divisor;
     }
 
     public static decimal CalculateSlaCompliance(List<ItsmTicket> tickets)
@@ -42,26 +44,51 @@ public static class ItsmCalculations
         return (decimal)compliantTickets / closedTickets.Count;
     }
 
-    public static decimal CalculateSlaComplianceScore(List<ItsmTicket> tickets)
-    {
-        return CalculateSlaCompliance(tickets);
-    }
-
     public static int CalculateOpenTickets(List<ItsmTicket> tickets)
     {
         return tickets.Count(t => t.Status == ItsmStatus.InProgress);
     }
 
-    public static decimal CalculateOpenTicketsScore(List<ItsmTicket> tickets)
+    public static decimal CalculateOpenTicketsScore(
+        List<ItsmTicket> tickets,
+        ClientItsmThreshold threshold)
     {
         var openTickets = CalculateOpenTickets(tickets);
 
-        if (openTickets <= 10)
+        if (openTickets <= threshold.OpenTickets100Max)
             return 1m;
 
-        if (openTickets <= 50)
+        if (openTickets <= threshold.OpenTickets70Max)
             return 0.7m;
 
         return 0.3m;
+    }
+
+    public static decimal CalculateOpenTicketsWeighted(
+        List<ItsmTicket> tickets,
+        ClientItsmThreshold threshold)
+    {
+        return CalculateOpenTicketsScore(tickets, threshold) * OperationalSecurityWeights.OpenTickets;
+    }
+
+    public static decimal CalculateMttrWeighted(
+        List<ItsmTicket> tickets,
+        ClientItsmThreshold threshold)
+    {
+        return CalculateMttrScore(tickets, threshold) * OperationalSecurityWeights.Mttr;
+    }
+
+    public static decimal CalculateSlaComplianceWeighted(List<ItsmTicket> tickets)
+    {
+        return CalculateSlaCompliance(tickets) * OperationalSecurityWeights.SlaCompliance;
+    }
+
+    public static decimal CalculateOperationalSecurityItsmTotal(
+        List<ItsmTicket> tickets,
+        ClientItsmThreshold threshold)
+    {
+        return CalculateOpenTicketsWeighted(tickets, threshold)
+             + CalculateMttrWeighted(tickets, threshold)
+             + CalculateSlaComplianceWeighted(tickets);
     }
 }
