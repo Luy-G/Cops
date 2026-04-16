@@ -5,23 +5,22 @@ public class Client
     public bool IsActive { get; set; } = true;
 }
 
-
 public class ItsmTicket
 {
     public long ItsmTicketId { get; set; }
 
     public long ClientId { get; set; }
-    public SourceSystem SourceSystem { get; set; } = SourceSystem.Other;
+    public SourceSystem SourceSystem { get; set; }
 
-    public string TicketKey { get; set; }
+    public required string TicketKey { get; set; }
     public long IssueId { get; set; }
 
     public ItsmStatus Status { get; set; }
-    public ItsmIssueType IssueType { get; set; } 
-    public PriorityLevel Priority { get; set; } 
+    public ItsmTicketType TicketType { get; set; }
+    public PriorityLevel Priority { get; set; }
     public ItsmResolution Resolution { get; set; }
 
-    public string Title { get; set; }
+    public required string Title { get; set; }
     public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
 
@@ -49,15 +48,14 @@ public class ItsmTicket
     public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
 }
 
-
-public class ClientItsmThreshold
+public class ClientItsmCalcs
 {
-    public long ClientItsmThresholdId { get; set; }
+    public long ClientItsmCalculationId { get; set; }
 
     public long ClientId { get; set; }
 
-    public int OpenTickets100Max { get; set; }
-    public int OpenTickets70Max { get; set; }
+    public int OpenTicketsBestMax { get; set; }
+    public int OpenTicketsMediumMax { get; set; }
 
     public decimal MttrTargetHours { get; set; }
 }

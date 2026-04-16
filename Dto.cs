@@ -1,19 +1,19 @@
 public class SogilubJsonDto
 {
-    public required string TicketKey { get; set; }
-    public required double IssueId { get; set; }
+    public string? TicketKey { get; set; }
+    public double? IssueId { get; set; }
 
-    public required string Status { get; set; }
-    public required string IssueType { get; set; }
-    public required string Priority { get; set; }
-    public required string Resolution { get; set; }
+    public string? Status { get; set; }
+    public string? IssueType { get; set; }
+    public string? Priority { get; set; }
+    public string? Resolution { get; set; }
 
-    public required string Summary { get; set; }
+    public string? Summary { get; set; }
 
     public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset? CreatedAt { get; set; }
     public DateTimeOffset? ResolvedAt { get; set; }
     public DateTimeOffset? UpdatedAt { get; set; }
 

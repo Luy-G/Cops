@@ -12,18 +12,17 @@ public enum ItsmStatus
         Cancelled = 9,
         Reopened = 10
 }
-
-public enum ItsmIssueType
+public enum ItsmTicketType
 {
-        Unknown = 0,
-        Incident = 1,
-        Task = 2,
-        Subtask = 3,
-        ServiceRequest = 4,
-        Problem = 5,
-        Change = 6,
-        Case = 7,
-        Other = 8
+    Unknown = 0,
+    Incident = 1,
+    Task = 2,
+    Subtask = 3,
+    ServiceRequest = 4,
+    Problem = 5,
+    Change = 6,
+    Case = 7,
+    Other = 8
 }
 
 public enum PriorityLevel
@@ -66,6 +65,5 @@ public enum DomainKey
 
 public enum SourceSystem
 {
-    Other = 0,
     Jira = 1
 }

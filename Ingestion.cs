@@ -1,41 +1,29 @@
-using FluentValidation;
+namespace ControloQualidade.Common.Ingestion;
 
 public class ItsmIngestion
 {
-    private readonly SogilubJsonDtoValidator _validator = new();
-
-    public ItsmTicket BuildTicket(SogilubJsonDto dto, long clientId)
+    public ItsmTicket Map(SogilubJsonDto dto, long clientId)
     {
-        var validationResult = _validator.Validate(dto);
-
-        if (!validationResult.IsValid)
-            throw new ArgumentException();
-
-        var issueId = Convert.ToInt64(dto.IssueId);
-
-        bool? firstResponseSlaBreached = null;
-
-        if (!string.IsNullOrWhiteSpace(dto.FirstResponseSlaBreached))
-            firstResponseSlaBreached = bool.Parse(dto.FirstResponseSlaBreached);
+        var firstResponseSlaBreached = ParseNullableBoolean(dto.FirstResponseSlaBreached);
 
         return new ItsmTicket
         {
             ClientId = clientId,
             SourceSystem = SourceSystem.Jira,
 
-            TicketKey = dto.TicketKey,
-            IssueId = issueId,
+            TicketKey =  dto.TicketKey!,
+            IssueId = Convert.ToInt64(dto.IssueId!.Value),
 
-            Status = ItsmEnumMapper.MapStatus(dto.Status),
-            IssueType = ItsmEnumMapper.MapIssueType(dto.IssueType),
-            Priority = ItsmEnumMapper.MapPriority(dto.Priority),
-            Resolution = ItsmEnumMapper.MapResolution(dto.Resolution),
+            Status = SogilubItsmMapper.MapStatus(dto.Status),
+            TicketType = SogilubItsmMapper.MapTicketType(dto.IssueType),
+            Priority = SogilubItsmMapper.MapPriority(dto.Priority),
+            Resolution = SogilubItsmMapper.MapResolution(dto.Resolution),
 
-            Title = dto.Summary,
+            Title = dto.Summary!,
             Description = dto.Description,
             DescriptionHtml = dto.DescriptionHtml,
 
-            CreatedAt = dto.CreatedAt.UtcDateTime,
+            CreatedAt = dto.CreatedAt!.Value.UtcDateTime,
             ResolvedAt = dto.ResolvedAt?.UtcDateTime,
             UpdatedAt = dto.UpdatedAt?.UtcDateTime,
 
@@ -55,6 +43,19 @@ public class ItsmIngestion
             FirstResponseSlaBreached = firstResponseSlaBreached,
 
             TimeSpentHours = dto.TimeSpentHours
+        };
+    }
+
+    private static bool? ParseNullableBoolean(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return value.Trim().ToLowerInvariant() switch
+        {
+            "true" => true,
+            "false" => false,
+            _ => null
         };
     }
 }
