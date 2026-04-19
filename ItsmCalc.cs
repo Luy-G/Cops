@@ -1,78 +1,97 @@
-using System.Collections.Generic;
-using System.Linq;
-
 public static class ItsmCalculations
 {
+    // média de horas gastas nos tickets fechados.
+    //conta tickets com estado Closed e que tenham o campo TimeSpentHours not null
     public static decimal CalculateMttr(IEnumerable<ItsmTicket> tickets)
     {
         var closedTickets = tickets.Where(t => t.Status == ItsmStatus.Closed && t.TimeSpentHours.HasValue).ToList();
 
+        // se não houver tickets fechados da 0
         if (!closedTickets.Any())
             return 0m;
 
         return closedTickets.Average(t => t.TimeSpentHours!.Value);
     }
 
-    public static decimal CalculateMttrScore(IEnumerable<ItsmTicket> tickets,ClientItsmCalcVar calcs)
+    // passa o mttr para um score entre 0 e 1
+    // quanto mais o mttr ultrapassar o objetivo mais o score se aproxima de 0
+    public static decimal CalculateMttrScore(IEnumerable<ItsmTicket> tickets, ClientItsmCalcs calcs)
     {
         var mttr = CalculateMttr(tickets);
         var target = calcs.MttrTargetHours;
 
+        //bjetivo a zero não faz sentido
         if (target <= 0)
             return 0m;
 
+        // se o mttr for melhor que o objetivo, usa o objetivo como divisor para não passar 1.0
         var divisor = mttr > target ? mttr : target;
 
         return target / divisor;
     }
 
+    // quantos tickets fechados não violaram o SLA.
+    // 0.9 significa 90% de conformidade.
     public static decimal CalculateSlaCompliance(IEnumerable<ItsmTicket> tickets)
     {
+        // conta tickets fechados com o campo SlaBreached preenchido
         var closedTickets = tickets.Where(t => t.Status == ItsmStatus.Closed && t.FirstResponseSlaBreached.HasValue).ToList();
 
         if (!closedTickets.Any())
             return 0m;
 
-        var compliantTickets = closedTickets.Count(t => t.FirstResponseSlaBreached == false);
+        //tickets onde o SLA nao foi violado
+        var compliantCount = closedTickets.Count(t => t.FirstResponseSlaBreached == false);
 
-        return (decimal)compliantTickets / closedTickets.Count;
+        return (decimal)compliantCount / closedTickets.Count;
     }
 
+    // cnta quantos tickets estão neste momento com estado In Progress
+    //número que determina o score de tickets abertos.
     public static int CalculateOpenTickets(IEnumerable<ItsmTicket> tickets)
     {
         return tickets.Count(t => t.Status == ItsmStatus.InProgress);
     }
 
-    public static decimal CalculateOpenTicketsScore(IEnumerable<ItsmTicket> tickets,ClientItsmCalcs calcs)
+    // Abaixo de BestMax = score máximo, etc
+    public static decimal CalculateOpenTicketsScore(IEnumerable<ItsmTicket> tickets, ClientItsmCalcs calcs)
     {
-        var openTickets = CalculateOpenTickets(tickets);
+        var count = CalculateOpenTickets(tickets);
 
-        if (openTickets <= calcs.OpenTicketsBestMax)
+        if (count <= calcs.OpenTicketsBestMax)
             return OpenTicketsScorePercentages.Best;
 
-        if (openTickets <= calcs.OpenTicketsMediumMax)
+        if (count <= calcs.OpenTicketsMediumMax)
             return OpenTicketsScorePercentages.Medium;
 
         return OpenTicketsScorePercentages.Worst;
     }
 
-    public static decimal CalculateOpenTicketsWeighted(IEnumerable<ItsmTicket> tickets,ClientItsmCalcs calcs)
+    // multiplica o score de tickets abertos pelo seu peso no domínio(25%)
+    public static decimal CalculateOpenTicketsWeighted(IEnumerable<ItsmTicket> tickets, ClientItsmCalcs calcs)
     {
         return CalculateOpenTicketsScore(tickets, calcs) * OperationalSecurityWeights.OpenTickets;
     }
 
-    public static decimal CalculateMttrWeighted(IEnumerable<ItsmTicket> tickets,ClientItsmCalcs calcs)
+    // multiplica o score de mttr pelo seu peso no domínio(20%)
+    public static decimal CalculateMttrWeighted(IEnumerable<ItsmTicket> tickets, ClientItsmCalcs calcs)
     {
         return CalculateMttrScore(tickets, calcs) * OperationalSecurityWeights.Mttr;
     }
 
+    // multiplica o score de SLA pelo seu peso no domínio(10%)
     public static decimal CalculateSlaComplianceWeighted(IEnumerable<ItsmTicket> tickets)
     {
         return CalculateSlaCompliance(tickets) * OperationalSecurityWeights.SlaCompliance;
     }
 
-    public static decimal CalculateOperationalSecurityItsmTotal(IEnumerable<ItsmTicket> tickets,ClientItsmCalcs calcs)
+    // Calcula o score total do domínio Segurança Operacional com os dados ITSM disponíveis.
+    public static decimal CalculateOperationalSecurityItsmTotal(IEnumerable<ItsmTicket> tickets, ClientItsmCalcs calcs)
     {
-        return CalculateOpenTicketsWeighted(tickets, calcs)+ CalculateMttrWeighted(tickets, calcs)+ CalculateSlaComplianceWeighted(tickets);
+        var weighted = CalculateOpenTicketsWeighted(tickets, calcs)
+            + CalculateMttrWeighted(tickets, calcs)
+            + CalculateSlaComplianceWeighted(tickets);
+
+        return weighted / OperationalSecurityWeights.TotalActiveWeight;
     }
 }

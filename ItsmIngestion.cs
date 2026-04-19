@@ -1,17 +1,18 @@
 namespace ControloQualidade.Common.Ingestion;
-
-public class ItsmIngestion
+public class SogilubItsmIngestion
 {
     public ItsmTicket Map(SogilubJsonDto dto, long clientId)
     {
+        //SlaBreached vem como texto do jira, passamos para boolean
         var firstResponseSlaBreached = ParseNullableBoolean(dto.FirstResponseSlaBreached);
 
         return new ItsmTicket
         {
             ClientId = clientId,
+
             SourceSystem = SourceSystem.Jira,
 
-            TicketKey =  dto.TicketKey!,
+            TicketKey = dto.TicketKey!,
             IssueId = Convert.ToInt64(dto.IssueId!.Value),
 
             Status = SogilubItsmMapper.MapStatus(dto.Status),
@@ -23,29 +24,33 @@ public class ItsmIngestion
             Description = dto.Description,
             DescriptionHtml = dto.DescriptionHtml,
 
+            //convertemos para UTC para consistencia
             CreatedAt = dto.CreatedAt!.Value.UtcDateTime,
             ResolvedAt = dto.ResolvedAt?.UtcDateTime,
             UpdatedAt = dto.UpdatedAt?.UtcDateTime,
 
             CreatorName = dto.CreatorName,
             CreatorEmail = dto.CreatorEmail,
-
             CurrentAssigneeName = dto.AssigneeName,
             CurrentAssigneeEmail = dto.AssigneeEmail,
-
             ReporterName = dto.ReporterName,
             ReporterEmail = dto.ReporterEmail,
 
+            //dados do SLA de primeira resposta
             FirstResponseDurationText = dto.FirstResponseDurationText,
-            FirstResponseDurationMs = dto.FirstResponseDurationMs,
+            // jira envia em double, guardamos em long em milissegundos
+            FirstResponseDurationMs = dto.FirstResponseDurationMs.HasValue ? (long)dto.FirstResponseDurationMs.Value : null,
             FirstResponseSlaStartAt = dto.FirstResponseSlaStartAt?.UtcDateTime,
             FirstResponseSlaCompleteAt = dto.FirstResponseSlaCompleteAt?.UtcDateTime,
             FirstResponseSlaBreached = firstResponseSlaBreached,
 
+            // horas gastas no ticket(calcular o MTTR)
             TimeSpentHours = dto.TimeSpentHours
         };
     }
 
+    // passar o texto "true"/"false" para boolean
+    // da null se vier vazio(SLA ainda não foi avaliado)
     private static bool? ParseNullableBoolean(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -53,9 +58,9 @@ public class ItsmIngestion
 
         return value.Trim().ToLowerInvariant() switch
         {
-            "true" => true,
+            "true"  => true,
             "false" => false,
-            _ => null
+            _       => null
         };
     }
 }

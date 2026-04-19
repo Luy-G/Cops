@@ -3,63 +3,72 @@ public class SogilubJsonDtoValidator : AbstractValidator<SogilubJsonDto>
 {
     public SogilubJsonDtoValidator()
     {
+        //obrigatória
         RuleFor(x => x.TicketKey)
             .NotEmpty()
-            .WithMessage("TicketKey is required.");
+            .WithErrorCode("TICKET_KEY_REQUIRED");
+
+        // obrigatório e tem de ser maior que zero
 
         RuleFor(x => x.IssueId)
             .Cascade(CascadeMode.Stop)
             .NotNull()
-            .WithMessage("IssueId is required.")
+            .WithErrorCode("ISSUE_ID_REQUIRED")
             .GreaterThan(0)
-            .WithMessage("IssueId must be greater than 0.");
+            .WithErrorCode("ISSUE_ID_INVALID");
 
+        //obrigatório
         RuleFor(x => x.Status)
             .NotEmpty()
-            .WithMessage("Status is required.");
+            .WithErrorCode("STATUS_REQUIRED");
 
+        //obrigatório
         RuleFor(x => x.IssueType)
             .NotEmpty()
-            .WithMessage("IssueType is required.");
+            .WithErrorCode("ISSUE_TYPE_REQUIRED");
 
+        //obrigatória
         RuleFor(x => x.Priority)
             .NotEmpty()
-            .WithMessage("Priority is required.");
+            .WithErrorCode("PRIORITY_REQUIRED");
 
-        RuleFor(x => x.Resolution)
-            .NotEmpty()
-            .WithMessage("Resolution is required.");
-
+        //obrigatório
         RuleFor(x => x.Summary)
             .NotEmpty()
-            .WithMessage("Summary is required.");
+            .WithErrorCode("SUMMARY_REQUIRED");
 
+        //obrigatória (calcular o MTTR e ordenar tickets)
         RuleFor(x => x.CreatedAt)
             .NotNull()
-            .WithMessage("CreatedAt is required.");
+            .WithErrorCode("CREATED_AT_REQUIRED");
 
+        //se existirem tem de ser zero ou positivas
         RuleFor(x => x.TimeSpentHours)
             .GreaterThanOrEqualTo(0)
             .When(x => x.TimeSpentHours.HasValue)
-            .WithMessage("TimeSpentHours cannot be negative.");
+            .WithErrorCode("TIME_SPENT_HOURS_INVALID");
 
+        // se existir tem de ser zero ou positivo
         RuleFor(x => x.FirstResponseDurationMs)
             .GreaterThanOrEqualTo(0)
             .When(x => x.FirstResponseDurationMs.HasValue)
-            .WithMessage("FirstResponseDurationMs cannot be negative.");
+            .WithErrorCode("FIRST_RESPONSE_DURATION_MS_INVALID");
 
+        //se existir tem de ser depois da data de criação
         RuleFor(x => x.ResolvedAt)
             .GreaterThan(x => x.CreatedAt!.Value)
             .When(x => x.ResolvedAt.HasValue && x.CreatedAt.HasValue)
-            .WithMessage("ResolvedAt cannot be earlier than CreatedAt.");
+            .WithErrorCode("RESOLVED_AT_INVALID");
 
+        //se existirtem de ser igual ou depois da data de criação
         RuleFor(x => x.UpdatedAt)
             .GreaterThanOrEqualTo(x => x.CreatedAt!.Value)
             .When(x => x.UpdatedAt.HasValue && x.CreatedAt.HasValue)
-            .WithMessage("UpdatedAt cannot be earlier than CreatedAt.");
+            .WithErrorCode("UPDATED_AT_INVALID");
 
+        //se existir só pode ser "true" ou "false" em texto
         RuleFor(x => x.FirstResponseSlaBreached)
             .Must(x => x == null || x == "true" || x == "false")
-            .WithMessage("FirstResponseSlaBreached must be 'true', 'false' or null.");
+            .WithErrorCode("FIRST_RESPONSE_SLA_BREACHED_INVALID");
     }
 }
