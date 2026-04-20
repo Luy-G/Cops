@@ -3,7 +3,7 @@ public class SogilubItsmIngestion
 {
     public ItsmTicket Map(SogilubJsonDto dto, long clientId)
     {
-        //SlaBreached vem como texto do jira, passamos para boolean
+        //SlaBreached vem como texto do jira passamos para boolean
         var firstResponseSlaBreached = ParseNullableBoolean(dto.FirstResponseSlaBreached);
 
         return new ItsmTicket
@@ -38,7 +38,7 @@ public class SogilubItsmIngestion
 
             //dados do SLA de primeira resposta
             FirstResponseDurationText = dto.FirstResponseDurationText,
-            // jira envia em double, guardamos em long em milissegundos
+            // jira envia em double guardamos em long em ms
             FirstResponseDurationMs = dto.FirstResponseDurationMs.HasValue ? (long)dto.FirstResponseDurationMs.Value : null,
             FirstResponseSlaStartAt = dto.FirstResponseSlaStartAt?.UtcDateTime,
             FirstResponseSlaCompleteAt = dto.FirstResponseSlaCompleteAt?.UtcDateTime,
