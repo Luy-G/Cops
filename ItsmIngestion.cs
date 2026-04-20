@@ -12,7 +12,7 @@ public class SogilubItsmIngestion
 
             SourceSystem = SourceSystem.Jira,
 
-            TicketKey = dto.TicketKey!,
+            TicketKey = dto.Key!,
             IssueId = Convert.ToInt64(dto.IssueId!.Value),
 
             Status = SogilubItsmMapper.MapStatus(dto.Status),
@@ -25,9 +25,9 @@ public class SogilubItsmIngestion
             DescriptionHtml = dto.DescriptionHtml,
 
             //convertemos para UTC para consistencia
-            CreatedAt = dto.CreatedAt!.Value.UtcDateTime,
-            ResolvedAt = dto.ResolvedAt?.UtcDateTime,
-            UpdatedAt = dto.UpdatedAt?.UtcDateTime,
+            CreatedAt = dto.Created!.Value.UtcDateTime,
+            ResolvedAt = dto.Resolved?.UtcDateTime,
+            UpdatedAt = dto.Updated?.UtcDateTime,
 
             CreatorName = dto.CreatorName,
             CreatorEmail = dto.CreatorEmail,

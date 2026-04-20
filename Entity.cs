@@ -97,6 +97,7 @@ public class VulnerabilityFinding
 
     public bool HasPublicExploit { get; set; }   //exploit público conhecido?
     public bool IsInternetExposed { get; set; }  //exposto à internet?
+    public bool IsInKevCatalog { get; set; }
 
     public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
 }
@@ -106,15 +107,14 @@ public class ClientVulnCalcs
     public long ClientVulnCalcsId { get; set; }
     public long ClientId { get; set; }
 
-    // thresholds para o indicador de vulnerabilidades críticas
-    public decimal CriticalRatioHighThreshold { get; set; }
-    public decimal CriticalRatioMediumThreshold { get; set; }
+    // MeanTimeToPatch, por severidade
+    public decimal CriticalPatchTargetHours { get; set; }       // default: 4h
+    public decimal HighPatchTargetHours { get; set; }           // default: 12h
+    public decimal MediumLowPatchTargetDays { get; set; }       // default: 5 dias úteis
 
-    // thresholds para o indicador de vulnerabilidades altas
-    public decimal HighRatioHighThreshold { get; set; }   
-    public decimal HighRatioMediumThreshold { get; set; }
-
-    // thresholds para o indicador de exposição à internet
-    public decimal ExposedRatioHighThreshold { get; set; }
-    public decimal ExposedRatioMediumThreshold { get; set; }
+    //thresholds para ScanCoverage e AssetsExposed
+    public decimal ScanCoverageHighThreshold { get; set; }
+    public decimal ScanCoverageMediumThreshold { get; set; }
+    public decimal AssetsExposedHighThreshold { get; set; }
+    public decimal AssetsExposedMediumThreshold { get; set; }
 }

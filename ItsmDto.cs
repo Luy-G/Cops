@@ -1,8 +1,7 @@
 public class SogilubJsonDto
 {
     //SR-5295
-    [JsonPropertyName("Key")]
-    public string? TicketKey { get; set; }
+    public string? Key { get; set; }
 
     [JsonPropertyName("Issue ID")]
     public double? IssueId { get; set; }
@@ -28,15 +27,12 @@ public class SogilubJsonDto
     [JsonPropertyName("Description (HTML)")]
     public string? DescriptionHtml { get; set; }
 
-    [JsonPropertyName("Created")]
-    public DateTimeOffset? CreatedAt { get; set; }
+    public DateTimeOffset? Created { get; set; }
 
     //pode ser nulo se ainda estiver aberto
-    [JsonPropertyName("Resolved")]
-    public DateTimeOffset? ResolvedAt { get; set; }
+    public DateTimeOffset? Resolved { get; set; }
 
-    [JsonPropertyName("Updated")]
-    public DateTimeOffset? UpdatedAt { get; set; }
+    public DateTimeOffset? Updated { get; set; }
 
     [JsonPropertyName("Creator: Name")]
     public string? CreatorName { get; set; }

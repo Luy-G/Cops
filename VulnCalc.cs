@@ -1,97 +1,110 @@
 public static class VulnCalculations
 {
-    // conta os findings, exclui INFO e Unknown
-    // total é usado em todos os cálculos de rácio.
     public static int CountMeaningful(IEnumerable<VulnerabilityFinding> findings)
-    {
-        return findings.Count(f => f.Severity != VulnSeverity.Info && f.Severity != VulnSeverity.Unknown);
-    }
+        => findings.Count(f => f.Severity != VulnSeverity.Info && f.Severity != VulnSeverity.Unknown);
 
-    // conta os findings de uma severidade específica
-    public static int CountBySeverity(IEnumerable<VulnerabilityFinding> findings, VulnSeverity severity)
-    {
-        return findings.Count(f => f.Severity == severity);
-    }
+    // conta findings com CVSS > 9
+    public static int CountCriticalByCvss(IEnumerable<VulnerabilityFinding> findings)
+        => findings.Count(f => f.Cvss.HasValue && f.Cvss.Value > CvssRange.CriticalMin);
 
-    // calcula o score do indicador de vulnerabilidades críticas.
-    // exemplo: 2 críticos em 10 findings = rácio 0.20 → acima do threshold de 0.05 → score máximo (1.0)
-    public static decimal CalculateCriticalVulnScore(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
+    //CVSS / total
+    public static decimal CalculateCriticalVulnsScore(IEnumerable<VulnerabilityFinding> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
 
-        if (total == 0) return VulnRatioScoreSteps.None;
+        if (total == 0) return 0m;
 
-        var ratio = (decimal)CountBySeverity(list, VulnSeverity.Critical) / total;
+        var ratio = (decimal)CountCriticalByCvss(list) / total;
 
-        if (ratio == 0m)                              return VulnRatioScoreSteps.None;
-        if (ratio > calcs.CriticalRatioHighThreshold) return VulnRatioScoreSteps.High;
-        if (ratio >= calcs.CriticalRatioMediumThreshold) return VulnRatioScoreSteps.Medium;
-        return VulnRatioScoreSteps.Low;
+        var step = ratio == 0m               ? VulnRatioScoreSteps.None
+                 : ratio > CriticalVulnsThresholds.High   ? VulnRatioScoreSteps.High
+                 : ratio >= CriticalVulnsThresholds.Medium ? VulnRatioScoreSteps.Medium
+                 : VulnRatioScoreSteps.Low;
+
+        return step * VulnerabilityWeights.CriticalVulns;
     }
 
-    // calcula o score de vulnerabilidades altas(mesma lógica que as críticas)
-    public static decimal CalculateHighVulnScore(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
+    // conta findings HIGH CVSS 7.0–8.9,  Severity == High se CVSS null
+    public static int CountHigh(IEnumerable<VulnerabilityFinding> findings)
+        => findings.Count(f =>
+            f.Cvss.HasValue
+                ? f.Cvss.Value >= CvssRange.HighMin && f.Cvss.Value <= CvssRange.HighMax
+                : f.Severity == VulnSeverity.High);
+
+    public static decimal CalculateHighVulnsScore(IEnumerable<VulnerabilityFinding> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
 
-        if (total == 0) return VulnRatioScoreSteps.None;
+        if (total == 0) return 0m;
 
-        var ratio = (decimal)CountBySeverity(list, VulnSeverity.High) / total;
+        var ratio = (decimal)CountHigh(list) / total;
 
-        if (ratio == 0m)                          return VulnRatioScoreSteps.None;
-        if (ratio > calcs.HighRatioHighThreshold) return VulnRatioScoreSteps.High;
-        if (ratio >= calcs.HighRatioMediumThreshold) return VulnRatioScoreSteps.Medium;
-        return VulnRatioScoreSteps.Low;
+        var step = ratio == 0m             ? VulnRatioScoreSteps.None
+                 : ratio > HighVulnsThresholds.High   ? VulnRatioScoreSteps.High
+                 : ratio >= HighVulnsThresholds.Medium ? VulnRatioScoreSteps.Medium
+                 : VulnRatioScoreSteps.Low;
+
+        return step * VulnerabilityWeights.HighVulns;
     }
 
-    // ve se existe pelo menos um finding com exploit público conhecido
-    // é binário, qualquer exploit público é suficiente para o score máximo
+    //qualquer exploit público tem peso máximo
     public static decimal CalculatePublicExploitScore(IEnumerable<VulnerabilityFinding> findings)
-    {
-        return findings.Any(f => f.HasPublicExploit) ? 1.0m : 0.0m;
-    }
+        => findings.Any(f => f.HasPublicExploit) ? VulnerabilityWeights.PublicExploit : 0m;
 
-    // calcula o score de exposição à internet, proporção de findings em serviços expostos externamente
-    public static decimal CalculateInternetExposedScore(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
+    //qualquer finding no KEV catalog tem peso máximo
+    public static decimal CalculateKevScore(IEnumerable<VulnerabilityFinding> findings)
+        => findings.Any(f => f.IsInKevCatalog) ? VulnerabilityWeights.KevCatalog : 0m;
+
+    public static decimal CalculateInternetExposedScore(IEnumerable<VulnerabilityFinding> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
 
-        if (total == 0) return InternetExposedScoreSteps.None;
+        if (total == 0) return 0m;
 
         var ratio = (decimal)list.Count(f => f.IsInternetExposed) / total;
 
-        if (ratio == 0m)                               return InternetExposedScoreSteps.None;
-        if (ratio > calcs.ExposedRatioHighThreshold)   return InternetExposedScoreSteps.High;
-        if (ratio >= calcs.ExposedRatioMediumThreshold) return InternetExposedScoreSteps.Medium;
-        return InternetExposedScoreSteps.Low;
+        var step = ratio == 0m                                ? InternetExposedScoreSteps.None
+                 : ratio > InternetExposedThresholds.High   ? InternetExposedScoreSteps.High    // > 0.66
+                 : ratio >= InternetExposedThresholds.Medium ? InternetExposedScoreSteps.Medium  // 0.33–0.66
+                 : InternetExposedScoreSteps.Low;                                                // > 0
+
+        return step * VulnerabilityWeights.InternetExposed;
     }
 
-    // funções Weighted multiplicam o score pelo peso do indicador no domínio
-    public static decimal CalculateCriticalVulnWeighted(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
-        => CalculateCriticalVulnScore(findings, calcs) * VulnerabilityWeights.CriticalVulns;
+    //dados de datas não disponíveis no JSON actual
+    public static decimal CalculateMeanTimeToPatchScore(IEnumerable<VulnerabilityFinding> _)
+        => 0m; // DATA_UNAVAILABLE
 
-    public static decimal CalculateHighVulnWeighted(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
-        => CalculateHighVulnScore(findings, calcs) * VulnerabilityWeights.HighVulns;
+    // findings com CVE / total findings
+    public static decimal CalculateScanCoverageScore(IEnumerable<VulnerabilityFinding> findings,
+        decimal highThreshold = ScanCoverageThresholds.High,
+        decimal mediumThreshold = ScanCoverageThresholds.Medium)
+    {
+        var list = findings.ToList();
+        var total = CountMeaningful(list);
 
-    public static decimal CalculatePublicExploitWeighted(IEnumerable<VulnerabilityFinding> findings)
-        => CalculatePublicExploitScore(findings) * VulnerabilityWeights.PublicExploit;
+        if (total == 0) return 0m;
 
-    public static decimal CalculateInternetExposedWeighted(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
-        => CalculateInternetExposedScore(findings, calcs) * VulnerabilityWeights.InternetExposed;
+        var ratio = (decimal)list.Count(f =>
+            f.Severity != VulnSeverity.Info && f.Severity != VulnSeverity.Unknown
+            && !string.IsNullOrWhiteSpace(f.Cve)) / total;
 
-    // calcula o score total do domínio
-    // divide pelo peso total ativo para normalizar o resultado entre 0 e 1.
-    public static decimal CalculateVulnerabilityDomainTotal(IEnumerable<VulnerabilityFinding> findings, ClientVulnCalcs calcs)
+        var step = ratio >= highThreshold   ? VulnRatioScoreSteps.None    // boa cobertura == risco baixo
+                 : ratio >= mediumThreshold ? VulnRatioScoreSteps.Low      // cobertura média
+                 : ratio > 0m              ? VulnRatioScoreSteps.Medium   // cobertura fraca
+                 : VulnRatioScoreSteps.High;                               // sem CVEs identificados
+
+        return step * VulnerabilityWeights.ScanCoverage;
+    }
+
+    public static decimal CalculateVulnerabilityDomainTotal(IEnumerable<VulnerabilityFinding> findings)
     {
         var list = findings.ToList();
 
-        var weighted = CalculateCriticalVulnWeighted(list, calcs)
-            + CalculateHighVulnWeighted(list, calcs)
-            + CalculatePublicExploitWeighted(list)
-            + CalculateInternetExposedWeighted(list, calcs);
+        var weighted = CalculateCriticalVulnsScore(list)+ CalculateHighVulnsScore(list)+ CalculatePublicExploitScore(list)+ CalculateKevScore(list)+ CalculateScanCoverageScore(list);
 
         return weighted / VulnerabilityWeights.TotalActiveWeight;
     }
