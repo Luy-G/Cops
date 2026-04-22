@@ -3,14 +3,12 @@ using System.Text.Json.Serialization;
 
 public class CisaKevEntry
 {
-    [JsonPropertyName("cveID")]
-    public string? CveId { get; set; }
+    public string? cveID { get; set; }
 }
 
 public class CisaKevResponse
 {
-    [JsonPropertyName("vulnerabilities")]
-    public List<CisaKevEntry>? Vulnerabilities { get; set; }
+    public List<CisaKevEntry>? vulnerabilities { get; set; }
 }
 
 public interface IKevCatalogService
@@ -34,9 +32,9 @@ public class CisaKevCatalogService : IKevCatalogService
         var response = await _http.GetStringAsync(KevUrl, ct);
         var catalog = JsonSerializer.Deserialize<CisaKevResponse>(response);
 
-        return (catalog?.Vulnerabilities ?? [])
-            .Where(e => !string.IsNullOrWhiteSpace(e.CveId))
-            .Select(e => e.CveId!.Trim().ToUpperInvariant())
+        return (catalog?.vulnerabilities ?? [])
+            .Where(e => !string.IsNullOrWhiteSpace(e.cveID))
+            .Select(e => e.cveID!.Trim().ToUpperInvariant())
             .ToHashSet();
     }
 }

@@ -5,9 +5,41 @@ public class Client
 
     // deixa desativar um cliente sem o apagar da base de dados
     public bool IsActive { get; set; } = true;
+
+    public List<Domain> Domains { get; set; } = new() ;
 }
 
-public class ItsmTicket
+public class Domain
+{
+    public int Id { get; set; }
+    public DomainKey DomainKey { get; set; }
+
+    public string Name { get; set; } = null!;
+
+    public string? Description { get; set; }
+
+    public List<IMetrics> Metrics { get; set; } = new() ;
+}
+
+public interface IMetric
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Description { get; set; } = null!;
+    public string Expression { get; set; } = null!;
+}
+
+
+public class MttrMetric : IMetric
+{
+    public string Name => "MTTR Score";
+    public string Description => "Score baseado no MTTR face ao target";
+    public string Expression => "if(MttrTargetHours <= 0, 0, if(mttrHours <= MttrTargetHours, 1, MttrTargetHours / mttrHours))";
+}
+
+//operationalsecitsm
+
+public class Operationalsecitsm
 {
     public long ItsmTicketId { get; set; }
 
@@ -49,6 +81,8 @@ public class ItsmTicket
     public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
 }
 
+
+//constantes sogilub,etc  mesmo para vulns
 public class ClientItsmCalcs
 {
     public long ClientItsmCalculationId { get; set; }
@@ -65,7 +99,7 @@ public class ClientItsmCalcs
 }
 
 // vulnerabilidade encontrada num scan de segurança
-public class VulnerabilityFinding
+public class VulnerabilityAttackSurface
 {
     public long VulnerabilityFindingId { get; set; }
 
@@ -107,7 +141,7 @@ public class ClientVulnCalcs
     public long ClientVulnCalcsId { get; set; }
     public long ClientId { get; set; }
 
-    // MeanTimeToPatch, por severidade
+    // MeanTimeToPatch por severidade
     public decimal CriticalPatchTargetHours { get; set; }       // default: 4h
     public decimal HighPatchTargetHours { get; set; }           // default: 12h
     public decimal MediumLowPatchTargetDays { get; set; }       // default: 5 dias úteis
@@ -118,3 +152,8 @@ public class ClientVulnCalcs
     public decimal AssetsExposedHighThreshold { get; set; }
     public decimal AssetsExposedMediumThreshold { get; set; }
 }
+
+
+
+
+//ASSETS DE CLIENTE  tabela fabricante/modelo/licenciamento/ 

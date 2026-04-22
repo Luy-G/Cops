@@ -1,17 +1,6 @@
 public static class ItsmCalculations
 {
-    // média de horas gastas nos tickets fechados.
-    //conta tickets com estado Closed e que tenham o campo TimeSpentHours not null
-    public static decimal CalculateMttr(IEnumerable<ItsmTicket> tickets)
-    {
-        var closedTickets = tickets.Where(t => t.Status == ItsmStatus.Closed && t.TimeSpentHours.HasValue).ToList();
 
-        // se não houver tickets fechados da 0
-        if (!closedTickets.Any())
-            return 0m;
-
-        return closedTickets.Average(t => t.TimeSpentHours!.Value);
-    }
 
     // passa o mttr para um score entre 0 e 1
     // quanto mais o mttr ultrapassar o objetivo mais o score se aproxima de 0
@@ -20,7 +9,7 @@ public static class ItsmCalculations
         var mttr = CalculateMttr(tickets);
         var target = calcs.MttrTargetHours;
 
-        //bjetivo a zero não faz sentido
+        //objetivo a zero não faz sentido
         if (target <= 0)
             return 0m;
 
@@ -93,5 +82,21 @@ public static class ItsmCalculations
             + CalculateSlaComplianceWeighted(tickets);
 
         return weighted / OperationalSecurityWeights.TotalActiveWeight;
+    }
+
+
+
+
+        // média de horas gastas nos tickets fechados.
+    //conta tickets com estado Closed e que tenham o campo TimeSpentHours not null
+    private static decimal CalculateMttr(IEnumerable<ItsmTicket> tickets)
+    {
+        var closedTickets = tickets.Where(t => t.Status == ItsmStatus.Closed && t.TimeSpentHours.HasValue).ToList();
+
+        // se não houver tickets fechados da 0
+        if (!closedTickets.Any())
+            return 0m;
+
+        return closedTickets.Average(t => t.TimeSpentHours!.Value);
     }
 }

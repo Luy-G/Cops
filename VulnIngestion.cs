@@ -4,7 +4,7 @@ public class SogilubVulnIngestion
 {
     public VulnerabilityFinding Map(SogilubVulnFindingDto dto, long clientId, IReadOnlySet<string>? kevCveIds = null)
     {
-        var cve = dto.Metadata?.Cve?.Trim().ToUpperInvariant();
+        var cve = dto.Metadata?.CVE?.Trim().ToUpperInvariant();
         var isInKev = cve != null && kevCveIds != null && kevCveIds.Contains(cve);
 
         return new VulnerabilityFinding
@@ -16,8 +16,8 @@ public class SogilubVulnIngestion
             Severity = SogilubVulnMapper.MapSeverity(dto.Severity),
             Title = dto.Title!,
             // campos do bloco metadata do JSON, nullable
-            Cve = dto.Metadata?.Cve,
-            Cvss = SogilubVulnMapper.ParseCvss(dto.Metadata?.Cvss),
+            Cve = dto.Metadata?.CVE,
+            Cvss = SogilubVulnMapper.ParseCvss(dto.Metadata?.CVSS),
             Host = dto.Metadata?.Host,
             Port = dto.Metadata?.Port,
             Evidence = dto.Metadata?.Status,
