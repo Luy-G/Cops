@@ -3,8 +3,8 @@ public class SogilubJsonDtoValidator : AbstractValidator<SogilubJsonDto>
 {
     public SogilubJsonDtoValidator()
     {
-        //obrigatória
-        RuleFor(x => x.TicketKey)
+        //obrigatória — mapeada para TicketKey na entidade
+        RuleFor(x => x.Key)
             .NotEmpty()
             .WithErrorCode("TICKET_KEY_REQUIRED");
 
@@ -38,7 +38,7 @@ public class SogilubJsonDtoValidator : AbstractValidator<SogilubJsonDto>
             .WithErrorCode("SUMMARY_REQUIRED");
 
         //obrigatória (calcular o MTTR e ordenar tickets)
-        RuleFor(x => x.CreatedAt)
+        RuleFor(x => x.Created)
             .NotNull()
             .WithErrorCode("CREATED_AT_REQUIRED");
 
@@ -55,15 +55,15 @@ public class SogilubJsonDtoValidator : AbstractValidator<SogilubJsonDto>
             .WithErrorCode("FIRST_RESPONSE_DURATION_MS_INVALID");
 
         //se existir tem de ser depois da data de criação
-        RuleFor(x => x.ResolvedAt)
-            .GreaterThan(x => x.CreatedAt!.Value)
-            .When(x => x.ResolvedAt.HasValue && x.CreatedAt.HasValue)
+        RuleFor(x => x.Resolved)
+            .GreaterThan(x => x.Created!.Value)
+            .When(x => x.Resolved.HasValue && x.Created.HasValue)
             .WithErrorCode("RESOLVED_AT_INVALID");
 
-        //se existirtem de ser igual ou depois da data de criação
-        RuleFor(x => x.UpdatedAt)
-            .GreaterThanOrEqualTo(x => x.CreatedAt!.Value)
-            .When(x => x.UpdatedAt.HasValue && x.CreatedAt.HasValue)
+        //se existir tem de ser igual ou depois da data de criação
+        RuleFor(x => x.Updated)
+            .GreaterThanOrEqualTo(x => x.Created!.Value)
+            .When(x => x.Updated.HasValue && x.Created.HasValue)
             .WithErrorCode("UPDATED_AT_INVALID");
 
         //se existir só pode ser "true" ou "false" em texto

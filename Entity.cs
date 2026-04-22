@@ -18,23 +18,76 @@ public class Domain
 
     public string? Description { get; set; }
 
-    public List<IMetrics> Metrics { get; set; } = new() ;
+    public List<IMetric> Metrics { get; set; } = new();
 }
 
 public interface IMetric
 {
     public int Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string Description { get; set; } = null!;
-    public string Expression { get; set; } = null!;
+    public string Name { get; set; }
+    public string Description { get; set; }
+    // expressão NCalc avaliada em runtime com os parâmetros do contexto
+    public string Expression { get; set; }
 }
-
 
 public class MttrMetric : IMetric
 {
-    public string Name => "MTTR Score";
-    public string Description => "Score baseado no MTTR face ao target";
-    public string Expression => "if(MttrTargetHours <= 0, 0, if(mttrHours <= MttrTargetHours, 1, MttrTargetHours / mttrHours))";
+    public int Id { get; set; } = 1;
+    public string Name { get; set; } = "MTTR Score";
+    public string Description { get; set; } = "Score baseado no MTTR face ao target";
+    // Mttr(tickets) é uma função customizada exposta ao NCalc — calcula a média de horas nos tickets fechados
+    public string Expression { get; set; } = "if(MttrTargetHours <= 0, 0, if(Mttr(tickets) <= MttrTargetHours, 1, MttrTargetHours / Mttr(tickets)))";
+}
+
+public class OpenTicketsMetric : IMetric
+{
+    public int Id { get; set; } = 2;
+    public string Name { get; set; } = "Open Tickets Score";
+    public string Description { get; set; } = "Score baseado no número de tickets em progresso";
+    // OpenTicketsCount(tickets) conta quantos tickets têm estado InProgress
+    public string Expression { get; set; } =
+        "if(OpenTicketsCount(tickets) <= OpenTicketsBestMax, 1.0, if(OpenTicketsCount(tickets) <= OpenTicketsMediumMax, 0.7, 0.3))";
+}
+
+public class SlaComplianceMetric : IMetric
+{
+    public int Id { get; set; } = 3;
+    public string Name { get; set; } = "SLA Compliance Score";
+    public string Description { get; set; } = "Percentagem de tickets fechados sem violação de SLA";
+    // SlaCompliance(tickets) devolve o rácio de tickets fechados sem breach de SLA
+    public string Expression { get; set; } = "SlaCompliance(tickets)";
+}
+
+// interface que todos os domínios de scoring têm de implementar
+public interface IDomain
+{
+    DomainKey Key { get; }
+    // peso do domínio no score composto (ex: 0.18 para 18%)
+    decimal Weight { get; }
+    // retorna o score entre 0 e 1 (0 = risco máximo, 1 = sem risco)
+    decimal Calculate(DomainContext context);
+}
+
+// pesos fixos dos 7 domínios - iguais para todos os clientes
+public static class DomainWeights
+{
+    public const decimal ThreatLandscape               = 0.18m;
+    public const decimal VulnerabilityAndAttackSurface = 0.18m;
+    public const decimal DetectionAndResponse          = 0.18m;
+    public const decimal IdentityAndAccessSecurity     = 0.14m;
+    public const decimal GovernanceAndResilience       = 0.12m;
+    public const decimal OperationalSecurity           = 0.10m;
+    public const decimal HumanRisk                     = 0.10m;
+}
+
+// agrupa os dados disponíveis para um cliente num dado momento
+public class DomainContext
+{
+    public required long ClientId { get; init; }
+    public IReadOnlyList<Operationalsecitsm> ItsmTickets { get; init; } = [];
+    public IReadOnlyList<VulnerabilityAttackSurface> VulnFindings { get; init; } = [];
+    public ClientItsmCalcs? ItsmCalcs { get; init; }
+    public ClientVulnCalcs? VulnCalcs { get; init; }
 }
 
 //operationalsecitsm
@@ -107,7 +160,7 @@ public class VulnerabilityAttackSurface
 
     public SourceSystem SourceSystem { get; set; }
 
-    // ferramenta que fez o scan — confirmar com o cliente antes de definir
+    // ferramenta que fez o scan — confirmar
     public ScanEngine ScanEngine { get; set; }
 
     // F-01

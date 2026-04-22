@@ -5,9 +5,9 @@ public class ItsmCalculationsTests
     [Fact]
     public void CalculateOpenTicketsScore_ShouldReturnBest_WhenBelowBestMaxThreshold()
     {
-        var tickets = new List<ItsmTicket>
+        var tickets = new List<Operationalsecitsm>
         {
-            new ItsmTicket
+            new Operationalsecitsm
             {
                 ClientId = 1,
                 SourceSystem = SourceSystem.Jira,

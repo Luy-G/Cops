@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 public class SogilubJsonDto
 {
     //SR-5295

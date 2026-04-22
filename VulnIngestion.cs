@@ -2,12 +2,12 @@ namespace ControloQualidade.Common.Ingestion;
 
 public class SogilubVulnIngestion
 {
-    public VulnerabilityFinding Map(SogilubVulnFindingDto dto, long clientId, IReadOnlySet<string>? kevCveIds = null)
+    public VulnerabilityAttackSurface Map(SogilubVulnFindingDto dto, long clientId, IReadOnlySet<string>? kevCveIds = null)
     {
-        var cve = dto.Metadata?.CVE?.Trim().ToUpperInvariant();
+        var cve = dto.Metadata?.Cve?.Trim().ToUpperInvariant();
         var isInKev = cve != null && kevCveIds != null && kevCveIds.Contains(cve);
 
-        return new VulnerabilityFinding
+        return new VulnerabilityAttackSurface
         {
             ClientId = clientId,
             FindingKey = dto.Id!,
@@ -16,8 +16,8 @@ public class SogilubVulnIngestion
             Severity = SogilubVulnMapper.MapSeverity(dto.Severity),
             Title = dto.Title!,
             // campos do bloco metadata do JSON, nullable
-            Cve = dto.Metadata?.CVE,
-            Cvss = SogilubVulnMapper.ParseCvss(dto.Metadata?.CVSS),
+            Cve = dto.Metadata?.Cve,
+            Cvss = SogilubVulnMapper.ParseCvss(dto.Metadata?.Cvss),
             Host = dto.Metadata?.Host,
             Port = dto.Metadata?.Port,
             Evidence = dto.Metadata?.Status,
@@ -31,7 +31,7 @@ public class SogilubVulnIngestion
     }
 
     // findings INFO são excluídos dos cálculos de score
-    public IEnumerable<VulnerabilityFinding> MapAll(SogilubVulnReportDto report, long clientId, IReadOnlySet<string>? kevCveIds = null)
+    public IEnumerable<VulnerabilityAttackSurface> MapAll(SogilubVulnReportDto report, long clientId, IReadOnlySet<string>? kevCveIds = null)
     {
         // se vier nula no JSON, trata como lista vazia para não crashar
         return (report.vulnerability_findings ?? []).Select(f => Map(f, clientId, kevCveIds));

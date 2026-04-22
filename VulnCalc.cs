@@ -1,14 +1,14 @@
 public static class VulnCalculations
 {
-    public static int CountMeaningful(IEnumerable<VulnerabilityFinding> findings)
+    public static int CountMeaningful(IEnumerable<VulnerabilityAttackSurface> findings)
         => findings.Count(f => f.Severity != VulnSeverity.Info && f.Severity != VulnSeverity.Unknown);
 
     // conta findings com CVSS > 9
-    public static int CountCriticalByCvss(IEnumerable<VulnerabilityFinding> findings)
+    public static int CountCriticalByCvss(IEnumerable<VulnerabilityAttackSurface> findings)
         => findings.Count(f => f.Cvss.HasValue && f.Cvss.Value > CvssRange.CriticalMin);
 
     //CVSS / total
-    public static decimal CalculateCriticalVulnsScore(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculateCriticalVulnsScore(IEnumerable<VulnerabilityAttackSurface> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
@@ -26,13 +26,13 @@ public static class VulnCalculations
     }
 
     // conta findings HIGH CVSS 7.0–8.9,  Severity == High se CVSS null
-    public static int CountHigh(IEnumerable<VulnerabilityFinding> findings)
+    public static int CountHigh(IEnumerable<VulnerabilityAttackSurface> findings)
         => findings.Count(f =>
             f.Cvss.HasValue
                 ? f.Cvss.Value >= CvssRange.HighMin && f.Cvss.Value <= CvssRange.HighMax
                 : f.Severity == VulnSeverity.High);
 
-    public static decimal CalculateHighVulnsScore(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculateHighVulnsScore(IEnumerable<VulnerabilityAttackSurface> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
@@ -50,14 +50,14 @@ public static class VulnCalculations
     }
 
     //qualquer exploit público tem peso máximo
-    public static decimal CalculatePublicExploitScore(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculatePublicExploitScore(IEnumerable<VulnerabilityAttackSurface> findings)
         => findings.Any(f => f.HasPublicExploit) ? VulnerabilityWeights.PublicExploit : 0m;
 
     //qualquer finding no KEV catalog tem peso máximo
-    public static decimal CalculateKevScore(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculateKevScore(IEnumerable<VulnerabilityAttackSurface> findings)
         => findings.Any(f => f.IsInKevCatalog) ? VulnerabilityWeights.KevCatalog : 0m;
 
-    public static decimal CalculateInternetExposedScore(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculateInternetExposedScore(IEnumerable<VulnerabilityAttackSurface> findings)
     {
         var list = findings.ToList();
         var total = CountMeaningful(list);
@@ -75,11 +75,11 @@ public static class VulnCalculations
     }
 
     //dados de datas não disponíveis no JSON actual
-    public static decimal CalculateMeanTimeToPatchScore(IEnumerable<VulnerabilityFinding> _)
+    public static decimal CalculateMeanTimeToPatchScore(IEnumerable<VulnerabilityAttackSurface> _)
         => 0m; // DATA_UNAVAILABLE
 
     // findings com CVE / total findings
-    public static decimal CalculateScanCoverageScore(IEnumerable<VulnerabilityFinding> findings,
+    public static decimal CalculateScanCoverageScore(IEnumerable<VulnerabilityAttackSurface> findings,
         decimal highThreshold = ScanCoverageThresholds.High,
         decimal mediumThreshold = ScanCoverageThresholds.Medium)
     {
@@ -100,7 +100,7 @@ public static class VulnCalculations
         return step * VulnerabilityWeights.ScanCoverage;
     }
 
-    public static decimal CalculateVulnerabilityDomainTotal(IEnumerable<VulnerabilityFinding> findings)
+    public static decimal CalculateVulnerabilityDomainTotal(IEnumerable<VulnerabilityAttackSurface> findings)
     {
         var list = findings.ToList();
 

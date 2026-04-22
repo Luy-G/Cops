@@ -1,12 +1,12 @@
 namespace ControloQualidade.Common.Ingestion;
 public class SogilubItsmIngestion
 {
-    public ItsmTicket Map(SogilubJsonDto dto, long clientId)
+    public Operationalsecitsm Map(SogilubJsonDto dto, long clientId)
     {
         //SlaBreached vem como texto do jira passamos para boolean
         var firstResponseSlaBreached = ParseNullableBoolean(dto.FirstResponseSlaBreached);
 
-        return new ItsmTicket
+        return new Operationalsecitsm
         {
             ClientId = clientId,
 

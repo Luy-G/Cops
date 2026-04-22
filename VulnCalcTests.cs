@@ -3,9 +3,9 @@ using Xunit;
 public class VulnCalculationsTests
 {
     // helpers
-    private static VulnerabilityFinding Finding(VulnSeverity severity, decimal? cvss = null,
+    private static VulnerabilityAttackSurface Finding(VulnSeverity severity, decimal? cvss = null,
         bool hasExploit = false, bool isInternetExposed = false, bool isInKev = false)
-        => new VulnerabilityFinding
+        => new VulnerabilityAttackSurface
         {
             FindingKey = "F-test",
             Title = "Test",
@@ -55,7 +55,7 @@ public class VulnCalculationsTests
     public void CalculateCriticalVulnsScore_ShouldReturnFullWeight_WhenRatioAbove5Percent()
     {
         // 1 crítico CVSS 9.5 em 10 findings = ratio 0.10 → > 0.05 → score máximo = 0.25
-        var findings = new List<VulnerabilityFinding>
+        var findings = new List<VulnerabilityAttackSurface>
         {
             Finding(VulnSeverity.Critical, cvss: 9.5m)
         };
@@ -69,7 +69,7 @@ public class VulnCalculationsTests
     public void CalculateCriticalVulnsScore_ShouldReturnHalfWeight_WhenRatioBetween3And5Percent()
     {
         // 1 crítico CVSS 9.5 em 30 findings = ratio ~0.033 → >= 0.03 && <= 0.05 → 0.125
-        var findings = new List<VulnerabilityFinding>
+        var findings = new List<VulnerabilityAttackSurface>
         {
             Finding(VulnSeverity.Critical, cvss: 9.5m)
         };
@@ -109,7 +109,7 @@ public class VulnCalculationsTests
     public void CalculateHighVulnsScore_ShouldReturnFullWeight_WhenRatioAbove10Percent()
     {
         // 2 highs CVSS 7.5 em 10 findings = ratio 0.20 → > 0.10 → score máximo = 0.15
-        var findings = new List<VulnerabilityFinding>
+        var findings = new List<VulnerabilityAttackSurface>
         {
             Finding(VulnSeverity.High, cvss: 7.5m),
             Finding(VulnSeverity.High, cvss: 8.0m)
@@ -124,7 +124,7 @@ public class VulnCalculationsTests
     public void CalculateHighVulnsScore_ShouldReturnHalfWeight_WhenRatioBetween5And10Percent()
     {
         // 1 high CVSS 7.5 em 15 findings = ratio ~0.067 → >= 0.05 && <= 0.10 → 0.075
-        var findings = new List<VulnerabilityFinding>
+        var findings = new List<VulnerabilityAttackSurface>
         {
             Finding(VulnSeverity.High, cvss: 7.5m)
         };
@@ -153,8 +153,8 @@ public class VulnCalculationsTests
 
     // --- CalculateScanCoverageScore ---
 
-    private static VulnerabilityFinding FindingWithCve(VulnSeverity severity, string? cve)
-        => new VulnerabilityFinding
+    private static VulnerabilityAttackSurface FindingWithCve(VulnSeverity severity, string? cve)
+        => new VulnerabilityAttackSurface
         {
             FindingKey = "F-test",
             Title = "Test",
